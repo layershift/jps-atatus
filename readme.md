@@ -15,7 +15,7 @@ Proactively gain insights into application's end-to-end business transactions, d
 ### Deployment
 In order to get this solution instantly deployed, click the "Deploy to Jelastic" button
 
-[![GET IT HOSTED](https://raw.githubusercontent.com/jelastic-jps/jpswiki/master/images/getithosted.png)](https://app.j.layershift.co.uk/?manifest=https://github.com/layershift/jps-atatus/master/atatus.jps)
+[![GET IT HOSTED](https://raw.githubusercontent.com/jelastic-jps/jpswiki/master/images/getithosted.png)](https://app.j.layershift.co.uk/?manifest=https://github.com/layershift/jps-atatus/blob/master/atatus.jps)
 
 To deploy this package to Jelastic Private Cloud, import [this JPS manifest](https://raw.githubusercontent.com/layershift/jps-atatus/master/atatus.jps) within your dashboard ([detailed instruction](https://docs.jelastic.com/environment-export-import#import)).
 
