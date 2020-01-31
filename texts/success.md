@@ -1,0 +1,1 @@
+Eureka! Atatus was successfully installed!

@@ -1,0 +1,157 @@
+_info : 'https://docs.cloudscripting.com/1.6.2/'
+version: 1.6.2
+build: 20200122
+type: update
+name: 'atatus'
+id: 'atatus'
+homepage: https://jps.layershift.com/atatus
+baseUrl: https://raw.githubusercontent.com/layershift/jps-atatus/master
+logo: /images/atatus-thumb.png?_r=${fn.random}
+
+categories:
+ - apps/others
+
+description:
+  text: /texts/description.md
+  short: Application&Infrastructure monitoring tool
+
+targetNodes:
+  nodeGroup: '*'
+
+globals:
+  message: ""
+
+settings:
+  main:
+    fields:
+    - type: string
+      name: licensekey
+      caption: License Key
+      hideLabel: false
+      required: true
+    
+    
+menu:
+  - caption: Restart Atatus
+    loadingText: Restarting..
+    confirmText: Are you sure you wish to restart Atatus?
+    action: restartAtatus
+  - caption: Configure
+    loadingText: Updating..
+    settings: main
+    confirmText: Are you sure you wish to configure Atatus?
+    action: install
+    successText: /text/success.md
+  - caption: Show Configuration File
+    loadingText: Checking..
+    confirmText: Are you sure you wish to see the content of /etc/atatus-infra-agent/atatus.yml?
+    action: checkatatusConf
+
+buttons:
+  - caption: Status
+    loadingText: Checking..
+    action: checkAtatusStatus
+  - caption: Dashboard
+    href: https://www.atatus.com/login
+  
+onAfterRedeployContainer:
+  install:
+    name: Install Action
+
+onAfterAddNode:
+  install:
+    name: Install Action
+
+onAfterCloneNodes:
+  install:
+    name: Install Action
+
+onInstall:
+  install:
+    name: Install Action
+
+onUninstall:
+  cmd [${targetNodes.nodeGroup}]:
+    - service atatus-infra-agent stop 2>&1 > /dev/null;
+    - /atatus-infra-agent-1.0.1-linux/install.sh uninstall
+    - rm -f /etc/sudoers.d/atatus;
+  sayYes: true
+  user: root
+
+actions:
+  appendMessage:
+    setGlobals:
+      message: ${globals.message}${this}
+
+  install:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - cd /
+          - wget https://s3.amazonaws.com/atatus-artifacts/atatus-infra/downloads/atatus-infra-agent-1.0.1-linux.tar.gz
+          - tar -xzvf atatus-infra-agent-1.0.1-linux.tar.gz
+          - cd atatus-infra-agent-1.0.1-linux
+          - ATATUS_LICENSE_KEY="${settings.licensekey}" bash install.sh install
+        sayYes: true
+        user: root
+      - appendMessage: ${response.out}
+    - if (globals.message.indexOf("Issue") !== -1):
+        message:  ${globals.message}
+        script: |
+          return {result: 2309, message: message.replace(/\n/g, '  \n')}
+
+  restartAtatus:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - service atatus-infra-agent restart;
+          - sleep 5;
+          - service atatus-infra-agent  status | grep active 2>&1 > /dev/null;
+          - if [ $? -gt 0 ]; then echo -en " - On node ${@node.id}\nStatus =  "; service atatus-infra-agent status |grep active; echo -e " \n\n"; fi;
+        user: root
+      - appendMessage: ${response.out}
+    - if (globals.message.length > 0):
+        return:
+          type: error
+          message: '${globals.message}'
+    - return:
+        type: success
+        message: 'Atatus restart complete'
+
+  checkAtatusStatus:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - echo -en " - On node ${@node.id}\nStatus =  ";
+          - service atatus-infra-agent status |grep active;
+          - echo -e " \n\n";
+        user: root
+      - appendMessage: ${response.out}
+    - message: ${globals.message}
+      script: |
+        return {result: 2308, message: message.replace(/\n/g, '  \n')}
+
+  checkatatusConf:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - echo -e "\n - On node ${@node.id}\n cat /etc/atatus-infra-agent/atatus.yml";
+          - cat /etc/atatus-infra-agent/atatus.yml;
+        user: root
+      - appendMessage: ${response.out}
+    - message: ${globals.message}
+      script: |
+        return {result: 2308, message: message.replace(/\n/g, '  \n')}
+
+responses:
+  2308:
+    type: success
+  
+  2309:
+    type: error
+
+success: /texts/success.md

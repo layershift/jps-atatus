@@ -1,0 +1,3 @@
+Cmnd_Alias atatus = /usr/bin/systemctl restart atatus-infra-agent*, /usr/bin/systemctl stop atatus-infra-agent*, /usr/bin/systemctl start atatus-infra-agent*, /usr/bin/systemctl status atatus-infra-agent*, /usr/bin/atatus-infra-agent *, /usr/sbin/service atatus-infra-agent *
+
+%ssh-access ALL = NOPASSWD: atatus
