@@ -93,6 +93,7 @@ actions:
           - tar -xzvf atatus-infra-agent-1.0.1-linux.tar.gz
           - cd atatus-infra-agent-1.0.1-linux
           - ATATUS_LICENSE_KEY="${settings.licensekey}" bash install.sh install
+          - setfacl -R -m u:jelastic:rwx /etc/atatus-infra-agent/
         sayYes: true
         user: root
       - appendMessage: ${response.out}
